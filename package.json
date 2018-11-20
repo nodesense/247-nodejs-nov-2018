@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon src/server.js --port 8080",
-    "test": "echo running test",
+    "test": "mocha src/test",
     "build": "echo building",
     "deploy": "npm run build && npm test"
   },
@@ -20,7 +20,16 @@
     "jsonfile": "^5.0.0",
     "minimist": "^1.0.0",
     "morgan": "^1.9.1",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
     "uuid": "^3.3.2",
     "winston": "^3.1.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "istanbul": "^0.4.5",
+    "mocha": "^5.2.0",
+    "nyc": "^13.1.0",
+    "supertest": "^3.3.0"
   }
 }

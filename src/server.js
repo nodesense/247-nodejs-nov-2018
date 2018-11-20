@@ -1,38 +1,45 @@
 // server.js
 
-// importing from node_modues (no ./relative path)
 const minimist = require('minimist');
+const http = require('http');
 
-// app/index.js is default import 
-const app = require('./app');
+const app = require('./app'); // index.js is default
 
-console.log("node.js server");
+const args = minimist(process.argv.slice(2))
 
-const options = minimist(process.argv.slice(2));
+const HOST_IP = args.ip || '127.0.0.1'
+const PORT = args.port || 8080
+const NODE_ENV = process.env.NODE_ENV || 'development'
 
-console.log(options);
+console.log('Starting server at ', HOST_IP, PORT)
+console.log('Running on ', NODE_ENV)
 
-console.log("others ", options._)
-const PORT = options.port || 8080;
+const cluster = require('cluster');
+const numCPUs = require('os').cpus().length;
 
-console.log("PORT ", PORT)
+console.log('numCPUS **', numCPUs);
 
-//app.listen(PORT);
+if (cluster.isMaster) {
+  console.log(`Master ${process.pid} is running`);
 
+  // Fork workers.
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
 
-var http=require("http");
+  cluster.on('exit', (worker, code, signal) => {
+    console.log(`worker ${worker.process.pid} died`);
+  });
+} else {
+    console.log('Creating server **')
+    const server = http.createServer(app);
 
-//express application
-var server = http.createServer(app)
-
-server.listen(8080, "0.0.0.0", function(err){
-   
-    if (err) {
-        console.error("Could not listen ", err);
-        return;
-    }
-
-    console.log("callback ", server.address());
-})
-
-console.log("running on port ", PORT);
+    server.listen(PORT, HOST_IP, function(error){
+        if (!error) {
+            console.log('SERVER STARTED')
+        }
+    })
+}
+//console.log(process.env);
+// console.log(process.argv)
+// console.log(args)

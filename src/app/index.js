@@ -15,6 +15,8 @@ const appKeyMiddleware = require('./lib/appKeyMiddleware');
 const dbErrorMiddleware = require('./lib/dbErrorMiddleware');
 const productRouter = require('./routers/productRouter');
 
+const brandRouter = require('./routers/brandRouter');
+
 // loads config/index.js (which loads development/production.json)
 const config = require("./config");
 console.log("CONFIG ", config);
@@ -83,6 +85,9 @@ app.use(function(req, res, next){
 
 
 app.use(productRouter);
+
+app.get("/brands", brandRouter.getBrands);
+app.get("/brands/:id", brandRouter.getBrand)
 
 
 //BAD part, browser shall wait for response
@@ -198,6 +203,14 @@ app.use(function(req, res, next){
     console.log("middleware last one begin");
     next()
     console.log("middleware last one end");
+})
+
+
+app.get("/instance", function(req, res){
+    res.json({
+        pid: process.pid,
+        r: Math.random()
+    })
 })
 
 // wildcard, should be at last 

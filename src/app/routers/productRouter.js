@@ -26,10 +26,65 @@ router.get('/products', function(req, res){
 
 });
 
+//es6 promise example
+router.get('/products/promise', function(req, res){
+    let promise = Product.getAll();
+    promise
+        .then(function(products){ // resolve(rows)
+            res.json(products);
+        })
+        .catch(function(err){ // reject(err)
+            res.status(500)
+                .json({error: err})
+        })
+})
+
+// ES8, async and await keyword
+router.get('/products/es8', async function(req, res){
+    try {
+        let products = await Product.getAll();
+        return res.json(products);
+    }
+    catch(err) {
+        res.status(500)
+        .json({error: err})
+    }
+})
+
 // get single product
 // GET /products/1234
-router.get('/products/:id', function(req, res){
-    res.json({id: req.params.id});
+// router.get('/products/:id', async function(req, res){
+    
+//     try {
+//         let result = await Product.get(req.params.id)
+
+//         if (result.rows.length > 0) {
+//             let product =  result.rows[0];
+//             res.json(product)
+//         }
+
+//     }catch (err){
+//         res.status(500)
+//         .json({error: err})
+//     }
+// });
+
+router.get('/products/:id', async function(req, res){
+    
+    try {
+        let product = await Product.get(req.params.id)
+
+        if (!product) { // product is undefined
+            return res.status(404)
+                       .json({error: 'resource not found'})
+        }
+ 
+       res.json(product)
+
+    }catch (err){
+        res.status(500)
+        .json({error: err})
+    }
 });
 
 // create new resource
@@ -37,10 +92,15 @@ router.get('/products/:id', function(req, res){
 // POST /products
 // headers
 // {{payload as json }} - body
-router.post('/products', function(req, res){
-    console.log('mynext params', req.myNextParams)
-    console.log("Client data ", req.body);
-    res.json({result: true});
+router.post('/products', async function(req, res){
+    try {
+        // body {name, price}
+        let product = await Product.save(req.body);
+        res.json(product)
+    }catch(err) {
+        res.status(500)
+        .json({error: err})
+    }
 })
 
 // update existing resource
@@ -52,8 +112,15 @@ router.put('/products/:id', function(req, res){
 
 // delete existing resource
 // DELETE /products/1234
-router.delete('/products/:id', function(req, res){
-    res.json({result: true, id: req.params.id});
+router.delete('/products/:id', async function(req, res){
+    try {
+        // FIXME: check if id exists or not, then 404
+        await Product.delete(req.params.id)
+        res.sendStatus(200)
+    }catch (err) {
+        res.status(500)
+        .json({error: err})
+    }
 })
 
 
